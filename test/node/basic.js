@@ -1,6 +1,7 @@
 var EventEmitter = require('events').EventEmitter;
 var assert = require('better-assert');
 var url = require('url');
+var qs = require('qs');
 
 var request = require('../../');
 
@@ -38,6 +39,26 @@ describe('[node] request', function(){
         assert('POST' == obj.method);
         assert(':5000/echo' == obj.url);
         assert('baz' == obj.data.foo);
+        done();
+      });
+    })
+  })
+
+  describe('req.path_query()', function(){
+    it('should include path and query', function(done){
+      request
+      .get('localhost:5000/mypath?value1=1&value2=2')
+      .query({value3: 3})
+      .end(function(err, res){
+        var path_query = res.request.path_query();
+        // call twice to test idempotency
+        path_query = res.request.path_query();
+        var split = path_query.indexOf('?')
+        var parsed_qs = qs.parse(path_query.substring(split + 1));
+        assert(parsed_qs['value1'] == 1);
+        assert(parsed_qs['value2'] == 2);
+        assert(parsed_qs['value3'] == 3);
+        assert(path_query.substring(0, split) == '/mypath');
         done();
       });
     })
