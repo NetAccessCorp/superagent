@@ -572,20 +572,18 @@ it('req.timeout(ms) with redirect', function(next) {
   });
 });
 
-it('req.path_query() returns path and query', function(next) {
+it('req.parsed_url() returns path and query', function(next) {
   request
   .get('/mypath?value1=1&value2=2')
   .query({value3: 3})
   .end(function(err, res) {
-    var path_query = res.req.path_query();
+    var parsed_url = res.req.parsed_url();
     // call twice to test idempotency
-    path_query = res.req.path_query();
-    var q_mark = path_query.indexOf('?');
-    var qs_parts = path_query.substring(q_mark + 1).split('&');
-    assert(qs_parts.indexOf('value1=1') > -1);
-    assert(qs_parts.indexOf('value2=2') > -1);
-    assert(qs_parts.indexOf('value3=3') > -1);
-    assert(path_query.substring(0, q_mark) == '/mypath');
+    parsed_url = res.req.parsed_url();
+    assert(parsed_url['query'].indexOf('value1=1') > -1);
+    assert(parsed_url['query'].indexOf('value2=2') > -1);
+    assert(parsed_url['query'].indexOf('value3=3') > -1);
+    assert(parsed_url['pathname'] == '/mypath');
     next();
   });
 });

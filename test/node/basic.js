@@ -43,21 +43,23 @@ describe('[node] request', function(){
     })
   })
 
-  describe('req.path_query()', function(){
+  describe('req.parsed_url()', function(){
     it('should include path and query', function(done){
       request
-      .get('localhost:5000/mypath?value1=1&value2=2')
+      .get('http://localhost:5000/mypath?value1=1&value2=2')
       .query({value3: 3})
       .end(function(err, res){
-        var path_query = res.request.path_query();
+        var parsed_url = res.request.parsed_url();
         // call twice to test idempotency
-        path_query = res.request.path_query();
-        var q_mark = path_query.indexOf('?');
-        var qs_parts = path_query.substring(q_mark + 1).split('&');
-        assert(qs_parts.indexOf('value1=1') > -1);
-        assert(qs_parts.indexOf('value2=2') > -1);
-        assert(qs_parts.indexOf('value3=3') > -1);
-        assert(path_query.substring(0, q_mark) == '/mypath');
+        parsed_url = res.request.parsed_url();
+        assert(parsed_url['query'].indexOf('value1=1') > -1);
+        assert(parsed_url['query'].indexOf('value2=2') > -1);
+        assert(parsed_url['query'].indexOf('value3=3') > -1);
+        assert(parsed_url['pathname'] == '/mypath');
+        assert(parsed_url['host'] == 'localhost:5000');
+        assert(parsed_url['hostname'] == 'localhost');
+        assert(parsed_url['protocol'] == 'http:');
+        assert(parsed_url['port'] == '5000');
         done();
       });
     })
